@@ -49,6 +49,13 @@ GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Mouse(int button, int state, int x, int y);
 
+GLclampf convert_to_clampf_X(int x, int w) {
+	return (x - (w / 2.0f)) / (w / 2.0f);
+}
+GLclampf convert_to_clampf_Y(int y, int h) {
+	return (y - (h / 2.0f)) / (-h / 2.0f);
+}
+
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 { //--- 윈도우 생성하기
 	glutInit(&argc, argv); // glut 초기화
@@ -103,22 +110,24 @@ GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 
 void Mouse(int button, int state, int x, int y)
 {
+	GLclampf cx = convert_to_clampf_X(x, 800);
+	GLclampf cy = convert_to_clampf_Y(y, 600);
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		if (x < 400 && y < 300) // 왼위
+		if (cx < 0 && cy >= 0) // 왼위
 		{
-
+			cout << "왼위" << endl;
 		}
-		else if (x >= 400 && y < 300 ) //오위
+		else if (cx >= 0 && cy >= 0) //오위
 		{
-
+			cout << "오위" << endl;
 		}
-		else if (x < 400 && y >= 300) //왼아
+		else if (cx < 0 && cy < 0) //왼아
 		{
-
+			cout << "왼아" << endl;
 		}
-		else if (x >= 400 && y >= 300) //오아
+		else if (cx >= 0 && cy < 0) //오아
 		{
-
+			cout << "오아" << endl;
 		}
 	}
 		

@@ -8,51 +8,46 @@
 
 using namespace std;
 
-typedef struct BOX {
-	int x1, y1, x2, y2;
-	float r, g, b;
-}Box;
+class Box
+{
+public:
+	Box() {
+		random_device seeder;
+		const auto seed = seeder.entropy() ? seeder() : time(nullptr);
+		mt19937 eng(static_cast<mt19937::result_type>(seed));
+		uniform_real_distribution<double> dist(0.0f, 1.0f);
 
-Box four_box[4] = {};
+		this->r = (GLclampf)dist(eng);
+		this->g = (GLclampf)dist(eng);
+		this->b = (GLclampf)dist(eng);
+
+		this->x1 = 0.0f;
+		this->y1 = 0.0f;
+		this->x2 = 0.0f;
+		this->y2 = 0.0f;
+	}
+
+	void Draw_Box() {
+		glColor3f(this->r, this->g, this->b);
+		glRectf(this->x1, this->y1, this->x2, this->y2);
+	}
+
+	void set_rect(float x1, float y1, float x2, float y2) {
+		this->x1 = x1;
+		this->y1 = y1;
+		this->x2 = x2;
+		this->y2 = y2;
+	}
+private:
+	GLclampf r, g, b;
+	GLclampf x1, y1, x2, y2;
+};
+
+Box four_box[4];
 
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Mouse(int button, int state, int x, int y);
-
-void Draw_Rect(Box box);
-void init_Box() {
-	random_device seeder;
-	const auto seed = seeder.entropy() ? seeder() : time(nullptr);
-	mt19937 eng(static_cast<mt19937::result_type>(seed));
-	uniform_real_distribution<double> dist(0.0f, 1.0f);
-	
-	for (auto &box : four_box)
-	{
-		box.r = (GLclampf)dist(eng);
-		box.g = (GLclampf)dist(eng);
-		box.b = (GLclampf)dist(eng);
-	}
-
-	four_box[0].x1 = 0;
-	four_box[0].y1 = 0;
-	four_box[0].x2 = -400;
-	four_box[0].y2 = 300;
-
-	four_box[1].x1 = 0;
-	four_box[1].y1 = 0;
-	four_box[1].x2 = 400;
-	four_box[1].y2 = 300;
-
-	four_box[2].x1 = 0;
-	four_box[2].y1 = 0;
-	four_box[2].x2 = -400;
-	four_box[2].y2 = -300;
-
-	four_box[3].x1 = 0;
-	four_box[3].y1 = 0;
-	four_box[3].x2 = 400;
-	four_box[3].y2 = -300;
-}
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 { //--- 윈도우 생성하기
@@ -70,7 +65,17 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 		exit(EXIT_FAILURE);
 	}
 	else std::cout << "GLEW Initialized\n";
-	init_Box();
+
+	int n = 0;
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			four_box[n].set_rect(j - 1, -i, j, (1 - i)); //박스 위치 초기화
+			n++;
+		}
+	}
+
 	glutDisplayFunc(drawScene); // 출력 함수의 지정
 	glutReshapeFunc(Reshape); // 다시 그리기 함수 지정
 	glutMouseFunc(Mouse); //키보드 입력 콜백 함수
@@ -79,13 +84,13 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
-	glClearColor(0.3f, 0.3f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT); // 설정된 색으로 전체를 칠하기
 	// 그리기 부분 구현: 그리기 관련 부분이 여기에 포함된다.
 
-	for (const auto& box : four_box)
+	for (int i = 0; i < 4; i++)
 	{
-		Draw_Rect(box);
+		four_box[i].Draw_Box();
 	}
 
 	glutSwapBuffers(); // 화면에 출력하기
@@ -117,9 +122,4 @@ void Mouse(int button, int state, int x, int y)
 		}
 	}
 		
-}
-
-void Draw_Rect(Box box) {
-	glColor3f(box.r, box.g, box.b);
-	glRectf(box.x1, box.y1, box.x2, box.y2);
 }

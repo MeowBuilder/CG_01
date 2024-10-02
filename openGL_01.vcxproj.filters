@@ -15,22 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="01.cpp">
+    <ClCompile Include="01f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="02.cpp">
+    <ClCompile Include="02f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="03.cpp">
+    <ClCompile Include="03f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="04.cpp">
+    <ClCompile Include="04f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="05.cpp">
+    <ClCompile Include="05f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="06.cpp">
+    <ClCompile Include="06f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="07.cpp">

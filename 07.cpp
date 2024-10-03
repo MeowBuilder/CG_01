@@ -329,7 +329,7 @@ void move_shape(int selected, float dx,float dy) {
 
 	uniform_int_distribution<int> random(0, 100);
 	int ver_sel = 0;
-	int mid_x, mid_y;
+	float mid_x, mid_y;
 	switch (selected)
 	{
 	case 0://Á¡

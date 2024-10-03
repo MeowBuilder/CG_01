@@ -269,7 +269,7 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		break;
 	case 'a':
 		selected_shape = sel_shape(eng);
-		move_shape(selected_shape, - 0.5f, 0);
+		move_shape(selected_shape, -0.5f, 0);
 		break;
 	case 's':
 		selected_shape = sel_shape(eng);
@@ -339,8 +339,8 @@ void move_shape(int selected, float dx,float dy) {
 
 		if (!is_in_rect(mid_x + dx, mid_y + dy)) break;
 
-		point_vertex[((ver_sel + 0) * 6)] += dx;
-		point_vertex[((ver_sel + 0) * 6) + 1] += dy;
+		point_vertex[((ver_sel * 6) + (0 * 6))] += dx;
+		point_vertex[((ver_sel * 6) + (0 * 6)) + 1] += dy;
 
 		break;
 	case 1://선
@@ -350,10 +350,10 @@ void move_shape(int selected, float dx,float dy) {
 
 		if (!is_in_rect(mid_x + dx, mid_y + dy)) break;
 
-		line_vertex[((ver_sel + 0) * 6)] += dx;
-		line_vertex[((ver_sel + 0) * 6) + 1] += dy;
-		line_vertex[((ver_sel + 1) * 6)] += dx;
-		line_vertex[((ver_sel + 1) * 6) + 1] += dy;
+		line_vertex[((ver_sel * 12) + (0 * 6))] += dx;
+		line_vertex[((ver_sel * 12) + (0 * 6)) + 1] += dy;
+		line_vertex[((ver_sel * 12) + (1 * 6))] += dx;
+		line_vertex[((ver_sel * 12) + (1 * 6)) + 1] += dy;
 		break;
 	case 2://삼각형
 		ver_sel = random(eng) % ((tri_vertex.size() / 6) / 3);
@@ -363,12 +363,12 @@ void move_shape(int selected, float dx,float dy) {
 
 		if (!is_in_rect(mid_x + dx, mid_y + dy)) break;
 
-		tri_vertex[((ver_sel + 0) * 6)] += dx;
-		tri_vertex[((ver_sel + 0) * 6) + 1] += dy;
-		tri_vertex[((ver_sel + 1) * 6)] += dx;
-		tri_vertex[((ver_sel + 1) * 6) + 1] += dy;
-		tri_vertex[((ver_sel + 2) * 6)] += dx;
-		tri_vertex[((ver_sel + 2) * 6) + 1] += dy;
+		tri_vertex[((ver_sel * 18) + (0 * 6))] += dx;
+		tri_vertex[((ver_sel * 18) + (0 * 6)) + 1] += dy;
+		tri_vertex[((ver_sel * 18) + (1 * 6))] += dx;
+		tri_vertex[((ver_sel * 18) + (1 * 6)) + 1] += dy;
+		tri_vertex[((ver_sel * 18) + (2 * 6))] += dx;
+		tri_vertex[((ver_sel * 18) + (2 * 6)) + 1] += dy;
 		break;
 	case 3://사각형
 		ver_sel = random(eng) % ((rect_vertex.size() / 6) / 6);
@@ -378,19 +378,19 @@ void move_shape(int selected, float dx,float dy) {
 
 		if (!is_in_rect(mid_x + dx, mid_y + dy)) break;
 
-		rect_vertex[((ver_sel + 0) * 6)] += dx;
-		rect_vertex[((ver_sel + 0) * 6) + 1] += dy;
-		rect_vertex[((ver_sel + 1) * 6)] += dx;
-		rect_vertex[((ver_sel + 1) * 6) + 1] += dy;
-		rect_vertex[((ver_sel + 2) * 6)] += dx;
-		rect_vertex[((ver_sel + 2) * 6) + 1] += dy;
-		rect_vertex[((ver_sel + 3) * 6)] += dx;
-		rect_vertex[((ver_sel + 3) * 6) + 1] += dy;
+		rect_vertex[((ver_sel * 36) + (0 * 6))] += dx;
+		rect_vertex[((ver_sel * 36) + (0 * 6)) + 1] += dy;
+		rect_vertex[((ver_sel * 36) + (1 * 6))] += dx;
+		rect_vertex[((ver_sel * 36) + (1 * 6)) + 1] += dy;
+		rect_vertex[((ver_sel * 36) + (2 * 6))] += dx;
+		rect_vertex[((ver_sel * 36) + (2 * 6)) + 1] += dy;
+		rect_vertex[((ver_sel * 36) + (3 * 6))] += dx;
+		rect_vertex[((ver_sel * 36) + (3 * 6)) + 1] += dy;
 
-		rect_vertex[((ver_sel + 4) * 6)] += dx;
-		rect_vertex[((ver_sel + 4) * 6) + 1] += dy;
-		rect_vertex[((ver_sel + 5) * 6)] += dx;
-		rect_vertex[((ver_sel + 5) * 6) + 1] += dy;
+		rect_vertex[((ver_sel * 36) + (4 * 6))] += dx;
+		rect_vertex[((ver_sel * 36) + (4 * 6)) + 1] += dy;
+		rect_vertex[((ver_sel * 36) + (5 * 6))] += dx;
+		rect_vertex[((ver_sel * 36) + (5 * 6)) + 1] += dy;
 		break;
 	}
 }

@@ -66,7 +66,12 @@ GLuint VAO, tri_VBO;
 bool move_timer1 = false, move_timer2 = false, move_timer3 = false, move_timer4 = false;
 
 vector<vector<float>> tri_vertex = {{},{},{},{}};
-vector<vector<float>> speed = { {0,0},{0,0},{0,0},{0,0} };
+vector<vector<float>> speed = { {0,0,0},{0,0,0},{0,0,0},{0,0,0} };
+vector<vector<float>> speed_last = { {0,0},{0,0},{0,0},{0,0} };
+vector<vector<float>> move_3_max = { {1.0},{1.0},{1.0},{1.0} };
+vector<vector<float>> move_4_seta = { {0},{0},{0},{0} };
+vector<vector<float>> move_4_seta_speed = { {1},{1},{1},{1} };
+vector<vector<float>> move_4_xy = { {0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0} };
 
 
 GLvoid InitBuffer()
@@ -214,18 +219,50 @@ GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 GLvoid Keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case '1':
-		speed[0][0] = rand_speed(eng);
-		speed[0][1] = rand_speed(eng);
+		for (int i = 0; i < 4; i++)
+		{
+			speed[i][0] = rand_speed(eng);
+			speed[i][1] = rand_speed(eng);
+		}
 		move_timer1 = !move_timer1;
 		glutTimerFunc(10, TimerFunction, 1);
 		break;
 	case '2':
+		for (int i = 0; i < 4; i++)
+		{
+			speed_last[i][0] = rand_speed(eng);
+			speed_last[i][1] = rand_speed(eng);
+			speed[i][0] = speed_last[i][0];
+			speed[i][1] = 0;
+		}
+		move_timer2 = !move_timer2;
 		glutTimerFunc(10, TimerFunction, 2);
 		break;
 	case '3':
+		for (int i = 0; i < 4; i++)
+		{
+			speed_last[i][0] = rand_speed(eng);
+			speed_last[i][1] = rand_speed(eng);
+			speed[i][0] = speed_last[i][0];
+			speed[i][1] = 0;
+			speed[i][2] = 1.0f;
+		}
+		move_timer3 = !move_timer3;
 		glutTimerFunc(10, TimerFunction, 3);
 		break;
 	case '4':
+		for (int i = 0; i < 4; i++)
+		{
+			speed[i][0] = 0.001f;
+			speed[i][1] = 0.1f;
+			move_4_xy[i][0] = tri_vertex[i][0];
+			move_4_xy[i][1] = tri_vertex[i][1];
+			move_4_xy[i][2] = tri_vertex[i][6];
+			move_4_xy[i][3] = tri_vertex[i][7];
+			move_4_xy[i][4] = tri_vertex[i][12];
+			move_4_xy[i][5] = tri_vertex[i][13];
+		}
+		move_timer4 = !move_timer4;
 		glutTimerFunc(10, TimerFunction, 4);
 		break;
 	case 'q':
@@ -307,6 +344,69 @@ bool is_in_rect(float x, float y) {
 	return (x_in && y_in);
 }
 
+void Zig_Zag(int index) {
+	float mid_x, mid_y;
+
+	tri_vertex[index][0] += speed[index][0];
+	tri_vertex[index][1] += speed[index][1];
+
+	tri_vertex[index][6] += speed[index][0];
+	tri_vertex[index][7] += speed[index][1];
+
+	tri_vertex[index][12] += speed[index][0];
+	tri_vertex[index][13] += speed[index][1];
+
+	if (speed[index][0] == 0)
+	{
+		speed[index][2]++;
+	}
+
+	mid_x = (tri_vertex[index][0] + tri_vertex[index][6] + tri_vertex[index][12]) / 3;
+	mid_y = (tri_vertex[index][1] + tri_vertex[index][7] + tri_vertex[index][13]) / 3;
+
+	if (mid_x < -1.0f || mid_x > 1.0f)
+	{
+		tri_vertex[index][0] -= speed[index][0];
+		tri_vertex[index][1] -= speed[index][1];
+
+		tri_vertex[index][6] -= speed[index][0];
+		tri_vertex[index][7] -= speed[index][1];
+
+		tri_vertex[index][12] -= speed[index][0];
+		tri_vertex[index][13] -= speed[index][1];
+
+		speed_last[index][0] = speed[index][0];
+
+		speed[index][0] = 0;
+		speed[index][1] = speed_last[index][1];
+		speed[index][2] = 0;
+	}
+	else if (mid_y < -1.0f || mid_y > 1.0f)
+	{
+		speed[index][0] = 0;
+		speed[index][1] = -speed[index][1];
+
+		speed_last[index][1] = speed[index][1];
+	}
+	else if (speed[index][2] > 50)
+	{
+		tri_vertex[index][0] -= speed[index][0];
+		tri_vertex[index][1] -= speed[index][1];
+
+		tri_vertex[index][6] -= speed[index][0];
+		tri_vertex[index][7] -= speed[index][1];
+
+		tri_vertex[index][12] -= speed[index][0];
+		tri_vertex[index][13] -= speed[index][1];
+
+		speed_last[index][1] = speed[index][1];
+
+		speed[index][0] = -speed_last[index][0];
+		speed[index][1] = 0;
+		speed[index][2] = 0;
+	}
+}
+
 void move_rect(int index) {
 	float mid_x, mid_y;
 
@@ -321,6 +421,7 @@ void move_rect(int index) {
 
 	mid_x = (tri_vertex[index][0] + tri_vertex[index][6] + tri_vertex[index][12]) / 3;
 	mid_y = (tri_vertex[index][1] + tri_vertex[index][7] + tri_vertex[index][13]) / 3;
+
 	if (mid_x < -1.0f || mid_x > 1.0f)
 	{
 		speed[index][0] = -speed[index][0];
@@ -331,6 +432,111 @@ void move_rect(int index) {
 	}
 }
 
+void rect_spiral(int index) {
+	float mid_x, mid_y;
+
+	tri_vertex[index][0] += speed[index][0];
+	tri_vertex[index][1] += speed[index][1];
+
+	tri_vertex[index][6] += speed[index][0];
+	tri_vertex[index][7] += speed[index][1];
+
+	tri_vertex[index][12] += speed[index][0];
+	tri_vertex[index][13] += speed[index][1];
+
+	mid_x = (tri_vertex[index][0] + tri_vertex[index][6] + tri_vertex[index][12]) / 3;
+	mid_y = (tri_vertex[index][1] + tri_vertex[index][7] + tri_vertex[index][13]) / 3;
+	
+	if (mid_x < -move_3_max[index][0] || mid_x > move_3_max[index][0])
+	{
+		if (speed[index][0] < 0)
+		{
+			tri_vertex[index][0] +=  0.11f;
+
+			tri_vertex[index][6] +=  0.11f;
+
+			tri_vertex[index][12] +=  0.11f;
+		}
+		else
+		{
+			tri_vertex[index][0] -=  0.11f;
+
+			tri_vertex[index][6] -=  0.11f;
+
+			tri_vertex[index][12] -=  0.11f;
+		}
+
+		speed_last[index][0] = speed[index][0];
+		move_3_max[index][0] -= 0.05f;
+
+		speed[index][0] = 0;
+		speed[index][1] = -speed_last[index][1];
+
+	}
+	else if (mid_y < -move_3_max[index][0] || mid_y > move_3_max[index][0])
+	{
+		if (speed[index][1] < 0)
+		{
+			tri_vertex[index][1] += 0.11f;
+
+			tri_vertex[index][7] += 0.11f;
+
+			tri_vertex[index][13] += 0.11f;
+		}
+		else
+		{
+			tri_vertex[index][1] -=  0.11f;
+
+			tri_vertex[index][7] -=  0.11f;
+
+			tri_vertex[index][13] -=  0.11f;
+		}
+
+		speed_last[index][1] = speed[index][1];
+		move_3_max[index][0] -= 0.05f;
+
+		speed[index][0] = -speed_last[index][0];
+		speed[index][1] = 0;
+	}
+}
+
+void circle_spiral(int index) {
+	float mid_x, mid_y;
+
+	tri_vertex[index][0] = move_4_xy[index][0] + (cos(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+	tri_vertex[index][1] = move_4_xy[index][1] + (sin(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+
+	tri_vertex[index][6] = move_4_xy[index][2] + (cos(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+	tri_vertex[index][7] = move_4_xy[index][3] + (sin(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+
+	tri_vertex[index][12] = move_4_xy[index][4] + (cos(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+	tri_vertex[index][13] = move_4_xy[index][5] + (sin(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+
+	mid_x = (tri_vertex[index][0] + tri_vertex[index][6] + tri_vertex[index][12]) / 3;
+	mid_y = (tri_vertex[index][1] + tri_vertex[index][7] + tri_vertex[index][13]) / 3;
+
+	move_4_seta[index][0] += move_4_seta_speed[index][0];
+	speed[index][1] += speed[index][0];
+
+	if (move_4_seta[index][0] > 720)
+	{
+		move_4_seta_speed[index][0] = -move_4_seta_speed[index][0];
+		speed[index][0] = -speed[index][0];
+
+		tri_vertex[index][0] = move_4_xy[index][0] + (cos(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+		tri_vertex[index][1] = move_4_xy[index][1] + (sin(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+
+		tri_vertex[index][6] = move_4_xy[index][2] + (cos(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+		tri_vertex[index][7] = move_4_xy[index][3] + (sin(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+
+		tri_vertex[index][12] = move_4_xy[index][4] + (cos(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+		tri_vertex[index][13] = move_4_xy[index][5] + (sin(move_4_seta[index][0] * 3.14 / 180) * speed[index][1]);
+
+		move_4_seta[index][0] += move_4_seta_speed[index][0];
+		speed[index][1] += speed[index][0];
+	}
+}
+
 void TimerFunction(int value)
 {
 	switch (value)
@@ -338,25 +544,28 @@ void TimerFunction(int value)
 	case 1://튕기기
 		for (int i = 0; i < 4; i++)
 		{
-			move_rect(0);
+			move_rect(i);
 		}
 		if (move_timer1) glutTimerFunc(10, TimerFunction, value);
 		break;
 	case 2://지그재그
 		for (int i = 0; i < 4; i++)
 		{
+			Zig_Zag(i);
 		}
 		if (move_timer2) glutTimerFunc(10, TimerFunction, value);
 		break;
 	case 3://사각스파이럴
 		for (int i = 0; i < 4; i++)
 		{
+			rect_spiral(i);
 		}
 		if (move_timer3) glutTimerFunc(10, TimerFunction, value);
 		break;
 	case 4://원스파이럴
 		for (int i = 0; i < 4; i++)
 		{
+			circle_spiral(i);
 		}
 		if (move_timer4) glutTimerFunc(10, TimerFunction, value);
 		break;

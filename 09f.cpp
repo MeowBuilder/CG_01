@@ -265,6 +265,12 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 		move_timer4 = !move_timer4;
 		glutTimerFunc(10, TimerFunction, 4);
 		break;
+	case 's':
+		move_timer1 = false;
+		move_timer2 = false;
+		move_timer3 = false;
+		move_timer4 = false;
+		break;
 	case 'q':
 		glutLeaveMainLoop();
 		break;

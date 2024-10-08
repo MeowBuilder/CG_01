@@ -33,19 +33,22 @@
     <ClCompile Include="06f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="07.cpp">
+    <ClCompile Include="07f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="08.cpp">
+    <ClCompile Include="08f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="09.cpp">
+    <ClCompile Include="09f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="10.cpp">
+    <ClCompile Include="10f.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="11.cpp">
+    <ClCompile Include="11f.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="12.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

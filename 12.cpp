@@ -13,6 +13,7 @@ mt19937 eng(static_cast<mt19937::result_type>(seed));
 uniform_real_distribution<float> rand_color(0, 1);
 uniform_real_distribution<float> rand_size(0.01f, 0.25f);
 uniform_real_distribution<float> rand_xy(-1, 1);
+uniform_real_distribution<float> rand_speed(-0.01f, 0.01f);
 uniform_int_distribution<int> rand_shape(1, 5);
 
 //--- 필요한 헤더파일 선언
@@ -70,6 +71,7 @@ int cur_selected = -1;
 
 vector<vector<float>> vertexs = {};
 vector<int> cur_shape = {};
+vector<vector<float>> speed = {};
 
 vector<vector<float>> goal = {};
 
@@ -409,9 +411,14 @@ void merge(int index_this, int index_other) {
 	default:
 		break;
 	}
+
+	speed[index_this].push_back(rand_speed(eng));
+	speed[index_this].push_back(rand_speed(eng));
+
 	vertexs.erase(vertexs.begin() + index_other);
 	goal.erase(goal.begin() + index_other);
 	cur_shape.erase(cur_shape.begin() + index_other);
+	speed.erase(speed.begin() + index_other);
 }
 
 void Mouse(int button, int state, int x, int y)
@@ -841,7 +848,17 @@ void change_shape(int index) {
 
 void TimerFunction(int value) {
 
-	
+	for (int i = 0; i < vertexs.size(); i++)
+	{
+		if (speed[i].size() > 0)
+		{
+			if (speed[i][0] != 0)
+			{
+				move_rect(i);
+
+			}
+		}
+	}
 	glutTimerFunc(10, TimerFunction, 0);
 	glutPostRedisplay();
 }
@@ -855,6 +872,8 @@ void make_vertex(vector<float>* vec,float attribute[6]) {
 
 vector<float> make_random_shape() {
 	vector<float> newshape;
+	goal.push_back(newshape);
+	speed.push_back(newshape);
 	int num_of_vertex = rand_shape(eng);
 	float x = rand_xy(eng);
 	float y = rand_xy(eng);
@@ -952,34 +971,33 @@ vector<float> make_random_shape() {
 	default:
 		break;
 	}
-	goal.push_back(newshape);
 	return newshape;
 }
 
 void move_rect(int index) {
-	//float mid_x, mid_y;
+	float mid_x = 0, mid_y = 0;
 
-	//tri_vertex[index][0] += speed[index][0];
-	//tri_vertex[index][1] += speed[index][1];
+	for (int i = 0; i < vertexs[index].size() / 6; i++)
+	{
+		vertexs[index][(i * 6) + 0] += speed[index][0];
+		vertexs[index][(i * 6) + 1] += speed[index][1];
+	}
 
-	//tri_vertex[index][6] += speed[index][0];
-	//tri_vertex[index][7] += speed[index][1];
+	for (int i = 0; i < vertexs[index].size() / 6; i++)
+	{
+		mid_x += vertexs[index][(i * 6) + 0];
+		mid_y += vertexs[index][(i * 6) + 1];
+	}
 
-	//tri_vertex[index][12] += speed[index][0];
-	//tri_vertex[index][13] += speed[index][1];
+	mid_x = mid_x / (vertexs[index].size() / 6);
+	mid_y = mid_y / (vertexs[index].size() / 6);
 
-	//mid_x = (tri_vertex[index][0] + tri_vertex[index][6] + tri_vertex[index][12]) / 3;
-	//mid_y = (tri_vertex[index][1] + tri_vertex[index][7] + tri_vertex[index][13]) / 3;
-
-	//if (mid_x < -1.0f || mid_x > 1.0f)
-	//{
-	//	speed[index][0] = -speed[index][0];
-	//}
-	//else if (mid_y < -1.0f || mid_y > 1.0f)
-	//{
-	//	speed[index][1] = -speed[index][1];
-	//}
+	if (mid_x < -1.0f || mid_x > 1.0f)
+	{
+		speed[index][0] = -speed[index][0];
+	}
+	else if (mid_y < -1.0f || mid_y > 1.0f)
+	{
+		speed[index][1] = -speed[index][1];
+	}
 }
-
-
-// 이동 구현 후 시간 남으면 변화 애니메이션 적용

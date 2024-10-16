@@ -15,6 +15,7 @@ uniform_real_distribution<float> rand_size(0.01f, 0.25f);
 uniform_real_distribution<float> rand_xy(-1, 1);
 uniform_real_distribution<float> rand_speed(-0.01f, 0.01f);
 uniform_int_distribution<int> rand_shape(1, 5);
+uniform_int_distribution<int> rand_move(1, 2);
 
 //--- 필요한 헤더파일 선언
 #include <gl/glew.h>
@@ -60,6 +61,7 @@ void Mouse(int button, int state, int x, int y);
 void DragMouse(int x, int y);
 void make_vertex(vector<float>* vec, float attribute[6]);
 void move_rect(int index);
+void Zig_Zag(int index);
 
 //--- 필요한 변수 선언
 GLint width, height;
@@ -72,8 +74,9 @@ int cur_selected = -1;
 vector<vector<float>> vertexs = {};
 vector<int> cur_shape = {};
 vector<vector<float>> speed = {};
-
+vector<vector<float>> speed_last = {};
 vector<vector<float>> goal = {};
+vector<float> move_type = {};
 
 GLvoid InitBuffer()
 {
@@ -411,14 +414,29 @@ void merge(int index_this, int index_other) {
 	default:
 		break;
 	}
+	move_type[index_this] = rand_move(eng);
 
-	speed[index_this].push_back(rand_speed(eng));
-	speed[index_this].push_back(rand_speed(eng));
+	if (move_type[index_this] == 1)
+	{
+		speed[index_this].push_back(rand_speed(eng));
+		speed[index_this].push_back(rand_speed(eng));
+	}
+	else
+	{
+		speed_last[index_this].push_back(rand_speed(eng));
+		speed_last[index_this].push_back(rand_speed(eng));
+
+		speed[index_this].push_back(speed_last[index_this][0]);
+		speed[index_this].push_back(0.0f);
+	}
+	speed[index_this].push_back(0.0f);
 
 	vertexs.erase(vertexs.begin() + index_other);
 	goal.erase(goal.begin() + index_other);
 	cur_shape.erase(cur_shape.begin() + index_other);
 	speed.erase(speed.begin() + index_other);
+	speed_last.erase(speed_last.begin() + index_other);
+	move_type.erase(move_type.begin() + index_other);
 }
 
 void Mouse(int button, int state, int x, int y)
@@ -446,7 +464,7 @@ void Mouse(int button, int state, int x, int y)
 					for (int j = 0; j < vertexs.size(); j++) {
 						if (i != j && is_on_other(vertexs[i],vertexs[j]))
 						{
-							merge(i, j); //야랄남
+							merge(i, j);
 							loop_break = true;
 							break;
 						}
@@ -852,10 +870,16 @@ void TimerFunction(int value) {
 	{
 		if (speed[i].size() > 0)
 		{
-			if (speed[i][0] != 0)
+			if (move_type[i] == 1)
 			{
-				move_rect(i);
-
+				if (speed[i][0] != 0)
+				{
+					move_rect(i);
+				}
+			}
+			else
+			{
+				Zig_Zag(i);
 			}
 		}
 	}
@@ -874,6 +898,8 @@ vector<float> make_random_shape() {
 	vector<float> newshape;
 	goal.push_back(newshape);
 	speed.push_back(newshape);
+	speed_last.push_back(newshape);
+	move_type.push_back(0.0f);
 	int num_of_vertex = rand_shape(eng);
 	float x = rand_xy(eng);
 	float y = rand_xy(eng);
@@ -999,5 +1025,65 @@ void move_rect(int index) {
 	else if (mid_y < -1.0f || mid_y > 1.0f)
 	{
 		speed[index][1] = -speed[index][1];
+	}
+}
+
+void Zig_Zag(int index) {
+	float mid_x = 0, mid_y = 0;
+
+	for (int i = 0; i < vertexs[index].size() / 6; i++)
+	{
+		vertexs[index][(i * 6) + 0] += speed[index][0];
+		vertexs[index][(i * 6) + 1] += speed[index][1];
+	}
+
+	if (speed[index][0] == 0)
+	{
+		speed[index][2]++;
+	}
+
+	for (int i = 0; i < vertexs[index].size() / 6; i++)
+	{
+		mid_x += vertexs[index][(i * 6) + 0];
+		mid_y += vertexs[index][(i * 6) + 1];
+	}
+
+	mid_x = mid_x / (vertexs[index].size() / 6);
+	mid_y = mid_y / (vertexs[index].size() / 6);
+
+	if (mid_x < -1.0f || mid_x > 1.0f)
+	{
+		for (int i = 0; i < vertexs[index].size() / 6; i++)
+		{
+			vertexs[index][(i * 6) + 0] -= speed[index][0];
+			vertexs[index][(i * 6) + 1] -= speed[index][1];
+		}
+
+		speed_last[index][0] = speed[index][0];
+
+		speed[index][0] = 0;
+		speed[index][1] = speed_last[index][1];
+		speed[index][2] = 0;
+	}
+	else if (mid_y < -1.0f || mid_y > 1.0f)
+	{
+		speed[index][0] = 0;
+		speed[index][1] = -speed[index][1];
+
+		speed_last[index][1] = speed[index][1];
+	}
+	else if (speed[index][2] > 50)
+	{
+		for (int i = 0; i < vertexs[index].size() / 6; i++)
+		{
+			vertexs[index][(i * 6) + 0] -= speed[index][0];
+			vertexs[index][(i * 6) + 1] -= speed[index][1];
+		}
+
+		speed_last[index][1] = speed[index][1];
+
+		speed[index][0] = -speed_last[index][0];
+		speed[index][1] = 0;
+		speed[index][2] = 0;
 	}
 }
